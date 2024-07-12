@@ -1,3 +1,4 @@
+.conda
 .idea
 .venv
 checkpoint_ssd300.pth.tar
