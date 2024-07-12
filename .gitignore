@@ -1,0 +1,11 @@
+.idea
+.venv
+checkpoint_ssd300.pth.tar
+checkpoint_ssd300.pth
+datasets
+image
+library/yolov8n.pt
+VOCtrainval_06-Nov-2007.tar
+VOC2007
+vw7zUn4h7U?key=vteQL5jc5g
+yolov8n.pt

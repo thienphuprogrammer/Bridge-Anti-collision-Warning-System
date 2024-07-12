@@ -1,0 +1,8 @@
+opencv-python~=4.10.0.82
+numpy~=1.26.4
+matplotlib~=3.9.0
+line
+utils~=1.0.2
+scipy~=1.14.0
+torch~=2.3.1
+torchvision~=0.18.1
