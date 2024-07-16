@@ -114,8 +114,7 @@ class Pinhole:
 
         """
         A = np.array([
-            [self.r, (self.r / self.R) * self.H - self.h_s_1, self.r / self.R],
-            [self.r, (self.r / self.R_prime) * self.H - self.h_s_2, self.r / self.R_prime]
+            [self.r / self.R, self.H / (self.R * self.h_s_1), -1],
         ])
 
         B = np.array([self.h_s_1 * self.R, self.h_s_2 * self.R_prime])

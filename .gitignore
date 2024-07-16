@@ -4,7 +4,6 @@
 checkpoint_ssd300.pth.tar
 checkpoint_ssd300.pth
 datasets
-image
 library/yolov8n.pt
 VOCtrainval_06-Nov-2007.tar
 VOC2007
