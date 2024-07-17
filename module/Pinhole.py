@@ -120,26 +120,18 @@ class Pinhole:
         h_s_2 = self.h_s_2
         r = self.r
 
-        result = [((
-                            -H * R * r + H * R_prime * r + R ** 2 * h_s_1 - R * R_prime * h_s_1 + R * R_prime * h_s_2 - R_prime ** 2 * h_s_2 - sqrt(
-                        (R - R_prime) * (
-                                H ** 2 * R * r ** 2 - H ** 2 * R_prime * r ** 2 + 2 * H * R ** 2 * h_s_1 * r + 2 * H * R * R_prime * h_s_1 * r - 2 * H * R * R_prime * h_s_2 * r - 2 * H * R_prime ** 2 * h_s_2 * r + R ** 3 * h_s_1 ** 2 - R ** 2 * R_prime * h_s_1 ** 2 - 2 * R ** 2 * R_prime * h_s_1 * h_s_2 + 2 * R * R_prime ** 2 * h_s_1 * h_s_2 + R * R_prime ** 2 * h_s_2 ** 2 - R_prime ** 3 * h_s_2 ** 2))) / (
-                        2 * r * (R - R_prime)), (
-                        -H * R * r + H * R_prime * r - R ** 2 * h_s_1 - R * R_prime * h_s_1 + R * R_prime * h_s_2 + R_prime ** 2 * h_s_2 - sqrt(
-                    (R - R_prime) * (
-                            H ** 2 * R * r ** 2 - H ** 2 * R_prime * r ** 2 + 2 * H * R ** 2 * h_s_1 * r + 2 * H * R * R_prime * h_s_1 * r - 2 * H * R * R_prime * h_s_2 * r - 2 * H * R_prime ** 2 * h_s_2 * r + R ** 3 * h_s_1 ** 2 - R ** 2 * R_prime * h_s_1 ** 2 - 2 * R ** 2 * R_prime * h_s_1 * h_s_2 + 2 * R * R_prime ** 2 * h_s_1 * h_s_2 + R * R_prime ** 2 * h_s_2 ** 2 - R_prime ** 3 * h_s_2 ** 2))) / (
-                        2 * (R * h_s_1 - R_prime * h_s_2))), ((
-                                                                      -H * R * r + H * R_prime * r + R ** 2 * h_s_1 - R * R_prime * h_s_1 + R * R_prime * h_s_2 - R_prime ** 2 * h_s_2 + sqrt(
-                                                                  (R - R_prime) * (
-                                                                          H ** 2 * R * r ** 2 - H ** 2 * R_prime * r ** 2 + 2 * H * R ** 2 * h_s_1 * r + 2 * H * R * R_prime * h_s_1 * r - 2 * H * R * R_prime * h_s_2 * r - 2 * H * R_prime ** 2 * h_s_2 * r + R ** 3 * h_s_1 ** 2 - R ** 2 * R_prime * h_s_1 ** 2 - 2 * R ** 2 * R_prime * h_s_1 * h_s_2 + 2 * R * R_prime ** 2 * h_s_1 * h_s_2 + R * R_prime ** 2 * h_s_2 ** 2 - R_prime ** 3 * h_s_2 ** 2))) / (
-                                                                      2 * r * (R - R_prime)), (
-                                                                      -H * R * r + H * R_prime * r - R ** 2 * h_s_1 - R * R_prime * h_s_1 + R * R_prime * h_s_2 + R_prime ** 2 * h_s_2 + sqrt(
-                                                                  (R - R_prime) * (
-                                                                          H ** 2 * R * r ** 2 - H ** 2 * R_prime * r ** 2 + 2 * H * R ** 2 * h_s_1 * r + 2 * H * R * R_prime * h_s_1 * r - 2 * H * R * R_prime * h_s_2 * r - 2 * H * R_prime ** 2 * h_s_2 * r + R ** 3 * h_s_1 ** 2 - R ** 2 * R_prime * h_s_1 ** 2 - 2 * R ** 2 * R_prime * h_s_1 * h_s_2 + 2 * R * R_prime ** 2 * h_s_1 * h_s_2 + R * R_prime ** 2 * h_s_2 ** 2 - R_prime ** 3 * h_s_2 ** 2))) / (
-                                                                      2 * (R * h_s_1 - R_prime * h_s_2)))]
-
-
-        return result
+        k1 = (h_s_1 * R) / r
+        k2 = (h_s_2 * R_prime) / r
+        k3 = k2 - k1
+        a = k3
+        b = (R + R_prime - H * R_prime + H * R) * k3
+        c = R * R_prime * k3
+        d = b ** 2 - 4 * a * c
+        x_1 = (-b + np.sqrt(d)) / (2 * a)
+        x_2 = (-b - np.sqrt(d)) / (2 * a)
+        y_1 = k1 - (H * x_1) / (x_1 + R)
+        y_2 = k1 - (H * x_2) / (x_2 + R)
+        return (x_1, y_1), (x_2, y_2)
 
     def tracking_point(self, d_s: float, d_y_loc: float) -> Tuple[float, float]:
         """

@@ -44,7 +44,7 @@ def vector_normalization(points: np.ndarray) -> np.ndarray:
     return vec_normal / np.linalg.norm(vec_normal)
 
 
-def cal_plane(points: np.ndarray) -> tuple[ndarray | ndarray, Any]:
+def plane_location(points: np.ndarray) -> tuple[ndarray | ndarray, Any]:
     vec_nor = vector_normalization(points)
     d = np.dot(vec_nor, points.T[0].T)
     return vec_nor, d
@@ -52,8 +52,8 @@ def cal_plane(points: np.ndarray) -> tuple[ndarray | ndarray, Any]:
 
 def range_image(points: np.ndarray) -> tuple[ndarray | ndarray, ndarray | ndarray]:
     point_A, point_B, point_C, point_D = points.T
-    line_AB = ray_tracing(np.array([point_A, point_B]))
-    line_CD = ray_tracing(np.array([point_C, point_D]))
+    line_AB = ray_tracing(np.array([point_A, point_D]))
+    line_CD = ray_tracing(np.array([point_C, point_B]))
     return line_AB, line_CD
 
 
@@ -88,6 +88,7 @@ def line_original_with_plane(point: np.ndarray, plane) -> np.ndarray:
     # plane: (3, 4)
     vec_n, d = plane
     return np.array([point, vec_n])
+
 
 class Camera:
     def __init__(self):
@@ -124,43 +125,112 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
 # create a camera object
 camera = Camera()
 n_points = 4
-z = [14, 14, 1, 1]
-y = [1, 7, 7, 1]
+z = [14, 14, 2, 2]
+y = [-4, 11, 11, -4]
 x = [0, 0, 0, 0]
 rand_points = np.vstack((x, y, z))
 
 project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
+print(project_points[:, 3])
 line_1, line_2 = range_image(project_points)
 
-new_point = [0, 3.23, 1.44]
-new_line = ray_tracing(np.array([offset, new_point]))
+# create an image grid
+xx, yy, Z = create_image_grid(f, img_size)
+# convert the image grid to homogeneous coordinates
+pt_h = convert_grid_to_homogeneous(xx, yy, Z, img_size)
+# transform the homogeneous coordinates
+pt_h_transformed = camera.T_ @ camera.R_ @ pt_h
+# convert the transformed homogeneous coordinates back to the image grid
+xxt, yyt, Zt = convert_homogeneous_to_grid(pt_h_transformed, img_size)
+rec = 20
+# define axis and figure
+fig = plt.figure(figsize=(14, 14))
+ax = fig.add_subplot(111,projection='3d')  # 111 is nrows, ncols, index
 
-plane_h = cal_plane(rand_points)
-intersection = intersection_between_line_and_plane(new_line, plane_h)
-# cal line original with the plane and the intersection point
-# point_or = np.array([0, 3.23, 0.87])
-# point_or = np.vstack((point_or, intersection))
-# line_or = line_original_with_plane(intersection, plane_h)
-# print(line_or)
-# intersection_or = intersection_between_line_and_plane(line_or, plane_h)
+# set limits
+ax.set(xlim=(0, rec), ylim=(0, rec), zlim=(0, rec))
 
-# Test the function
-x_ = [1, 0, 1, 0]
-y_ = [4.5, 4.5, 4.5, 4.5]
-z_ = [9, 8, 8, 7]
-rand_points_ = np.vstack((x_, y_, z_))
+# plot the camera in the world
+ax = pr.plot_basis(ax, camera.R, offset)
+ax.plot_surface(xxt, yyt, Zt, alpha=0.25)
 
-project_points_ = camera.project_3d_point_to_2d(rand_points_, is_homogeneous=False)
-line_1_, line_2_ = range_image(project_points_)
-r = f
-R = abs(offset[2] -z_[2])
-H = offset[0]
-print(project_points_)
-h_s_1 = abs(project_points_[0][0] - project_points_[0][1])
-h_s_2 = abs(project_points_[0][2] - project_points_[0][3])
-d_s_1 = abs(project_points_[1][0] - project_points_[1][1])
-d_s_2 = abs(project_points_[1][2] - project_points_[1][3])
-d_1 = 0.27
-W_c = abs(y[1] - y[0])
-pinhole = Pinhole(r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c)
-print(pinhole.calculate_height_and_length_of_target())
+# plot the generated random points
+c = 0
+for i in range(n_points):
+    point = rand_points[:, c]
+    ax.scatter(*point, color="orange")
+    ax.plot(*make_line(offset, point), color="purple", alpha=0.25)
+    c += 1
+
+ax.set_title("The Setup")
+ax.set_xlabel("X-axis")
+ax.set_ylabel("Y-axis")
+ax.set_zlabel("Z-axis")
+plt.show()
+
+
+#
+# new_point = [5.56, 4, 0]
+# new_line = ray_tracing(np.array([offset, new_point]))
+#
+# plane_h = plane_location(rand_points)
+# # intersection = intersection_between_line_and_plane(new_line, plane_h)
+#
+# # Test the function
+# point_1 = np.array([5.19, 4, 0])
+# point_2 = np.array([5.41, 4, 0])
+# point_3 = np.array([5.56, 4, 0])
+# point_4 = np.array([5.24, 4, 0])
+#
+# point_5 = np.array([5.41, 4.16, 0])
+# point_6 = np.array([5.41, 3.84, 0])
+# point_7 = np.array([5.56, 4.22, 0])
+# point_8 = np.array([5.56, 3.78, 0])
+# # points = np.vstack((point_1, point_2, point_3, point_4))
+# # new_line_1 = ray_tracing(np.array([offset, point_1]))
+# # new_line_2 = ray_tracing(np.array([offset, point_2]))
+# new_line_3 = ray_tracing(np.array([offset, point_3]))
+# # new_line_4 = ray_tracing(np.array([offset, point_4]))
+# # intersection_1 = intersection_between_line_and_plane(new_line_1, plane_h)
+# # intersection_2 = intersection_between_line_and_plane(new_line_2, plane_h)
+# intersection_3 = intersection_between_line_and_plane(new_line_3, plane_h)
+# # intersection_4 = intersection_between_line_and_plane(new_line_4, plane_h)
+#
+# r = f
+# R = abs(offset[2] - intersection_3[2])
+# H = offset[0]
+# h_s_1 = abs(point_1[0] - point_3[0])
+# h_s_2 = abs(point_2[0] - point_4[0])
+# d_s_1 = abs(point_5[1] - point_6[1])
+# d_s_2 = abs(point_7[1] - point_8[1])
+#
+# # calculate the width of the target
+# point_old_1, vec_u = line_1
+# t_1 = (point_old_1[1] - point_5[1]) / vec_u[1]
+# point_new_1 = point_old_1 + t_1 * vec_u
+#
+# point_old_2, vec_u = line_2
+# t_2 = (point_old_2[1] - point_6[1]) / vec_u[1]
+# point_new_2 = point_old_2 + t_2 * vec_u
+# d_1 = abs(point_new_1[1] - point_new_2[1])
+# W_c = abs(y[1] - y[0])
+#
+# print(f"r: {r}")
+# print(f"R: {R}")
+# print(f"H: {H}")
+# print(f"h_s_1: {h_s_1}")
+# print(f"h_s_2: {h_s_2}")
+# print(f"d_s_1: {d_s_1}")
+# print(f"d_s_2: {d_s_2}")
+# print(f"line_1: {line_1}")
+# print(f"line_2: {line_2}")
+# print(f"point_old_1: {point_old_1}")
+# print(f"point_old_2: {point_old_2}")
+# print(f"new_point_1: {point_new_2}")
+# print(f"new_point_2: {point_new_1}")
+# print(f"d_1: {d_1}")
+# print(f"W_c: {W_c}")
+#
+#
+# pinhole = Pinhole(r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c)
+# print(pinhole.calculate_height_and_length_of_target())
