@@ -1,4 +1,4 @@
-from Camera import *
+from module.Camera import *
 from module.utils import *
-from Pinhole import *
+from module.Pinhole import *
 from module.config import *

@@ -6,6 +6,11 @@ from module.utils import *
 from module.Pinhole import *
 
 
+def distance_between_points(point_1: np.ndarray, point_2: np.ndarray) -> float:
+    # compute the distance between two points
+    return np.linalg.norm(point_1 - point_2)
+
+
 def visualize_2d_projection(points: np.ndarray,
                             color: str = "orange",
                             title: str = "projection of points in the image") -> None:
@@ -122,53 +127,17 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
     return True
 
 
-# create a camera object
-camera = Camera()
-n_points = 4
-z = [14, 14, 2, 2]
-y = [-4, 11, 11, -4]
-x = [0, 0, 0, 0]
-rand_points = np.vstack((x, y, z))
-
-project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
-print(project_points[:, 3])
-line_1, line_2 = range_image(project_points)
-
-# create an image grid
-xx, yy, Z = create_image_grid(f, img_size)
-# convert the image grid to homogeneous coordinates
-pt_h = convert_grid_to_homogeneous(xx, yy, Z, img_size)
-# transform the homogeneous coordinates
-pt_h_transformed = camera.T_ @ camera.R_ @ pt_h
-# convert the transformed homogeneous coordinates back to the image grid
-xxt, yyt, Zt = convert_homogeneous_to_grid(pt_h_transformed, img_size)
-rec = 20
-# define axis and figure
-fig = plt.figure(figsize=(14, 14))
-ax = fig.add_subplot(111,projection='3d')  # 111 is nrows, ncols, index
-
-# set limits
-ax.set(xlim=(0, rec), ylim=(0, rec), zlim=(0, rec))
-
-# plot the camera in the world
-ax = pr.plot_basis(ax, camera.R, offset)
-ax.plot_surface(xxt, yyt, Zt, alpha=0.25)
-
-# plot the generated random points
-c = 0
-for i in range(n_points):
-    point = rand_points[:, c]
-    ax.scatter(*point, color="orange")
-    ax.plot(*make_line(offset, point), color="purple", alpha=0.25)
-    c += 1
-
-ax.set_title("The Setup")
-ax.set_xlabel("X-axis")
-ax.set_ylabel("Y-axis")
-ax.set_zlabel("Z-axis")
-plt.show()
-
-
+# # create a camera object
+# camera = Camera()
+# n_points = 4
+# z = [14, 14, 2, 2]
+# y = [-4, 11, 11, -4]
+# x = [0, 0, 0, 0]
+# rand_points = np.vstack((x, y, z))
+#
+# project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
+# line_1, line_2 = range_image(project_points)
+#
 #
 # new_point = [5.56, 4, 0]
 # new_line = ray_tracing(np.array([offset, new_point]))
@@ -177,53 +146,47 @@ plt.show()
 # # intersection = intersection_between_line_and_plane(new_line, plane_h)
 #
 # # Test the function
-# point_1 = np.array([5.19, 4, 0])
-# point_2 = np.array([5.41, 4, 0])
-# point_3 = np.array([5.56, 4, 0])
-# point_4 = np.array([5.24, 4, 0])
+# point_1 = np.array([5.19149, 4, 0])
+# point_2 = np.array([5.40541, 4, 0])
+# point_3 = np.array([5.55555, 4, 0])
+# point_4 = np.array([5.24324, 4, 0])
 #
 # point_5 = np.array([5.41, 4.16, 0])
 # point_6 = np.array([5.41, 3.84, 0])
 # point_7 = np.array([5.56, 4.22, 0])
 # point_8 = np.array([5.56, 3.78, 0])
+#
 # # points = np.vstack((point_1, point_2, point_3, point_4))
 # # new_line_1 = ray_tracing(np.array([offset, point_1]))
-# # new_line_2 = ray_tracing(np.array([offset, point_2]))
-# new_line_3 = ray_tracing(np.array([offset, point_3]))
+# new_line_2 = ray_tracing(np.array([offset, point_2]))
+# # new_line_3 = ray_tracing(np.array([offset, point_3]))
 # # new_line_4 = ray_tracing(np.array([offset, point_4]))
 # # intersection_1 = intersection_between_line_and_plane(new_line_1, plane_h)
-# # intersection_2 = intersection_between_line_and_plane(new_line_2, plane_h)
-# intersection_3 = intersection_between_line_and_plane(new_line_3, plane_h)
+# intersection_2 = intersection_between_line_and_plane(new_line_2, plane_h)
+# # intersection_3 = intersection_between_line_and_plane(new_line_3, plane_h)
 # # intersection_4 = intersection_between_line_and_plane(new_line_4, plane_h)
 #
 # r = f
-# R = abs(offset[2] - intersection_3[2])
+# R = abs(offset[2] - intersection_2[2])
 # H = offset[0]
-# h_s_1 = abs(point_1[0] - point_3[0])
-# h_s_2 = abs(point_2[0] - point_4[0])
+# h_s_1 = abs(point_1[0] - point_2[0])
+# h_s_2 = abs(point_3[0] - point_4[0])
 # d_s_1 = abs(point_5[1] - point_6[1])
 # d_s_2 = abs(point_7[1] - point_8[1])
 #
 # # calculate the width of the target
 # point_old_1, vec_u = line_1
-# t_1 = (point_old_1[1] - point_5[1]) / vec_u[1]
+# t_1 = (-point_old_1[0] + point_5[0]) / vec_u[0]
 # point_new_1 = point_old_1 + t_1 * vec_u
 #
 # point_old_2, vec_u = line_2
-# t_2 = (point_old_2[1] - point_6[1]) / vec_u[1]
+# t_2 = (-point_old_2[0] + point_5[0]) / vec_u[0]
 # point_new_2 = point_old_2 + t_2 * vec_u
-# d_1 = abs(point_new_1[1] - point_new_2[1])
+# d_1 = distance_between_points(point_new_1, point_new_2)
 # W_c = abs(y[1] - y[0])
-#
-# print(f"r: {r}")
-# print(f"R: {R}")
-# print(f"H: {H}")
-# print(f"h_s_1: {h_s_1}")
-# print(f"h_s_2: {h_s_2}")
-# print(f"d_s_1: {d_s_1}")
-# print(f"d_s_2: {d_s_2}")
 # print(f"line_1: {line_1}")
-# print(f"line_2: {line_2}")
+# print(f"t_1: {t_1}")
+# print(f"point_5: {point_5}")
 # print(f"point_old_1: {point_old_1}")
 # print(f"point_old_2: {point_old_2}")
 # print(f"new_point_1: {point_new_2}")
