@@ -127,6 +127,24 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
     return True
 
 
+def new_point(order_, old_point, line):
+    # compute the new point
+    # order_: str
+    # old_point: np.ndarray
+    # line: np.ndarra
+    point_ = None
+    if order_ == 'x':
+        t = (-line[0][0] + old_point[0]) / line[1][0]
+        point_ = line[0] + t * line[1]
+    elif order_ == 'y':
+        t = (-line[0][1] + old_point[1]) / line[1][1]
+        point_ = line[0] + t * line[1]
+    else:
+        t = (-line[0][2] + old_point[2]) / line[1][2]
+        point_ = line[0] + t * line[1]
+    return point_
+
+
 # # create a camera object
 # camera = Camera()
 # n_points = 4
@@ -137,11 +155,8 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
 #
 # project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
 # line_1, line_2 = range_image(project_points)
-#
-#
-# new_point = [5.56, 4, 0]
-# new_line = ray_tracing(np.array([offset, new_point]))
-#
+# visualize_2d_projection(project_points)
+# print(project_points)
 # plane_h = plane_location(rand_points)
 # # intersection = intersection_between_line_and_plane(new_line, plane_h)
 #
@@ -151,10 +166,10 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
 # point_3 = np.array([5.55555, 4, 0])
 # point_4 = np.array([5.24324, 4, 0])
 #
-# point_5 = np.array([5.41, 4.16, 0])
-# point_6 = np.array([5.41, 3.84, 0])
-# point_7 = np.array([5.56, 4.22, 0])
-# point_8 = np.array([5.56, 3.78, 0])
+# point_5 = np.array([5.40, 4.16, 0])
+# point_6 = np.array([5.40, 3.83, 0])
+# point_7 = np.array([5.55, 4.22, 0])
+# point_8 = np.array([5.55, 3.77, 0])
 #
 # # points = np.vstack((point_1, point_2, point_3, point_4))
 # # new_line_1 = ray_tracing(np.array([offset, point_1]))
@@ -171,8 +186,8 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
 # H = offset[0]
 # h_s_1 = abs(point_1[0] - point_2[0])
 # h_s_2 = abs(point_3[0] - point_4[0])
-# d_s_1 = abs(point_5[1] - point_6[1])
-# d_s_2 = abs(point_7[1] - point_8[1])
+# d_s_1 = distance_between_points(point_5, point_6)
+# d_s_2 = distance_between_points(point_7, point_8)
 #
 # # calculate the width of the target
 # point_old_1, vec_u = line_1
@@ -182,18 +197,19 @@ def check_points_in_range(point: np.ndarray, lines: np.ndarray) -> bool:
 # point_old_2, vec_u = line_2
 # t_2 = (-point_old_2[0] + point_5[0]) / vec_u[0]
 # point_new_2 = point_old_2 + t_2 * vec_u
+#
 # d_1 = distance_between_points(point_new_1, point_new_2)
 # W_c = abs(y[1] - y[0])
-# print(f"line_1: {line_1}")
-# print(f"t_1: {t_1}")
-# print(f"point_5: {point_5}")
-# print(f"point_old_1: {point_old_1}")
-# print(f"point_old_2: {point_old_2}")
-# print(f"new_point_1: {point_new_2}")
-# print(f"new_point_2: {point_new_1}")
+#
+# print(f"r: {r}")
+# print(f"R: {R}")
+# print(f"H: {H}")
+# print(f"h_s_1: {h_s_1}")
+# print(f"h_s_2: {h_s_2}")
+# print(f"d_s_1: {d_s_1}")
+# print(f"d_s_2: {d_s_2}")
 # print(f"d_1: {d_1}")
 # print(f"W_c: {W_c}")
-#
 #
 # pinhole = Pinhole(r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c)
 # print(pinhole.calculate_height_and_length_of_target())

@@ -74,9 +74,7 @@ class Pinhole:
     """
     Pinhole camera models with distortion correction.
     """
-    def __init__(self, r: float, R: float, H: float, h_s_1: float,
-                 h_s_2: float, d_s_1: float,
-                 d_s_2: float, d_1: float, W_c: float):
+    def __init__(self, r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c):
         self.r = r
         self.R = R
         self.H = H
@@ -95,7 +93,7 @@ class Pinhole:
         Calculate the width of the target.
         :return:
         """
-        W_s = self.d_s_1 * self.W_c / self.d_1
+        W_s = self.d_s_1 * self.R / self.r
         return W_s
 
     def calculate_r_prime(self, W_s: float) -> float:
@@ -131,6 +129,9 @@ class Pinhole:
         x_2 = (-b - np.sqrt(d)) / (2 * a)
         y_1 = k1 - (H * x_1) / (x_1 + R)
         y_2 = k1 - (H * x_2) / (x_2 + R)
+        y_1_prime = k2 - (H * x_1) / (x_1 + R_prime)
+        y_2_prime = k2 - (H * x_2) / (x_2 + R_prime)
+
         return (x_1, y_1), (x_2, y_2)
 
     def tracking_point(self, d_s: float, d_y_loc: float) -> Tuple[float, float]:
