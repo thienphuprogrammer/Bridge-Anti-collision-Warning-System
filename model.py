@@ -91,8 +91,10 @@ class Model:
         image_2 = Image.open(file_image_2)
         w_1, h_1 = image_1.size
         w_1 = (w_1 / ppi) * inch_to_cm
+        h_1 = (h_1 / ppi) * inch_to_cm
         w_2, h_2 = image_2.size
         w_2 = (w_2 / ppi) * inch_to_cm
+        h_2 = (h_2 / ppi) * inch_to_cm
 
         # get the objects in the first image
         objects_1 = model.get_objects_labels(results_1, label)  # get the mouse objects in the first image
@@ -100,6 +102,7 @@ class Model:
         num_array_1 = (num_array_1 / ppi) * inch_to_cm
 
         x_1_min, y_1_min, x_1_max, y_1_max = num_array_1
+        print(x_1_min, y_1_min, x_1_max, y_1_max)
         point_1 = np.array([x_1_min + (x_1_max - x_1_min) / 2, y_1_max, 0])
         point_1 = flip_point(point_1, w_1, h_1)
         point_2 = np.array([x_1_min + (x_1_max - x_1_min) / 2, y_1_min, 0])
@@ -161,9 +164,8 @@ class Model:
             f"r: {r} \nR: {R} \nH: {H} \nh_s_1: {h_s_1} \nh_s_2: {h_s_2} \nd_s_1: {d_s_1} \nd_s_2: {d_s_2} \nd_1: {d_1} \nW_c: {W_c} \nW_s: {self.pinhole.W_s} \nR_Prime: {self.pinhole.R_prime}")
         value = self.pinhole.calculate_height_and_length_of_target()
         L_s, H_s = value[0]
-        # round the value to 2 decimal places
-        # print(f"L_s: {L_s} \nH_s: {H_s}")
-        #
+        print(f"L_s: {L_s} \nH_s: {H_s}")
+
         # draw = ImageDraw.Draw(image_1)
         # draw.rectangle(num_array_1, outline='blue', width=2)
         # draw.text((10, 10), f"L_s: {L_s} \nH_s: {H_s}", fill='red', font_size=100)
