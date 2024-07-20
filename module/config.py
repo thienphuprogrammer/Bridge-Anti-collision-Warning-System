@@ -32,4 +32,4 @@ s = 0  # skew
 a = 1  # aspect ratio
 cx = 1  # principal point x
 cy = 15  # principal point y
-# img_size = (9248, 10)  # image size
+img_size = (9248, 10)  # image size

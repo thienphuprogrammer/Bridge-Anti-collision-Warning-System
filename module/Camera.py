@@ -1,7 +1,5 @@
-import numpy as np
 from matplotlib import pyplot as plt
 from numpy import ndarray
-from module.config import *
 from module.utils import *
 from module.Pinhole import *
 
@@ -96,7 +94,16 @@ def line_original_with_plane(point: np.ndarray, plane) -> np.ndarray:
 
 
 class Camera:
-    def __init__(self):
+    def __init__(self, angles, order, offset, f, s, a, cx, cy, image_size):
+        self.f = f
+        self.s = s
+        self.a = a
+        self.cx = cx
+        self.cy = cy
+        self.image_size = image_size
+        self.angles = angles
+        self.order = order
+        self.offset = offset
         self.R = create_rotation_transformation_matrix(angles, order)
         self.R_ = np.identity(4)
         self.R_[:3, :3] = self.R
@@ -144,7 +151,7 @@ def new_point(order_, old_point, line):
         point_ = line[0] + t * line[1]
     return point_
 
-
+#
 # # create a camera object
 # camera = Camera()
 # n_points = 4
@@ -155,8 +162,6 @@ def new_point(order_, old_point, line):
 #
 # project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
 # line_1, line_2 = range_image(project_points)
-# visualize_2d_projection(project_points)
-# print(project_points)
 # plane_h = plane_location(rand_points)
 # # intersection = intersection_between_line_and_plane(new_line, plane_h)
 #

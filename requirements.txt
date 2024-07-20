@@ -9,3 +9,5 @@ torchvision~=0.18.1
 pytransform3d~=3.5.0
 tqdm~=4.66.2
 pillow~=10.4.0
+sympy~=1.12
+ultralytics~=8.2.46
