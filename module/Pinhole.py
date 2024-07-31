@@ -122,17 +122,17 @@ class Pinhole:
         k2 = (h_s_2 * R_prime) / r
         k3 = k1 - k2
         a = k3
-        b = (R + R_prime) * k3 - H * R_prime + H * R
+        b = (R + R_prime) * k3 - (R_prime - R) * H
         c = R * R_prime * k3
         d = b ** 2 - 4 * a * c
-        x_1 = (-b + np.sqrt(d)) / (2 * a)
-        x_2 = (-b - np.sqrt(d)) / (2 * a)
+        x_1 = (-b + d ** 0.5) / (2 * a)
+        x_2 = (-b - d ** 0.5) / (2 * a)
         y_1 = k1 - (H * x_1) / (x_1 + R)
         y_2 = k1 - (H * x_2) / (x_2 + R)
         y_1_prime = k2 - (H * x_1) / (x_1 + R_prime)
         y_2_prime = k2 - (H * x_2) / (x_2 + R_prime)
 
-        return (x_1, y_1), (x_2, y_2)
+        return (x_1, y_1), (x_2, y_2), (x_1, y_1_prime), (x_2, y_2_prime)
 
     def tracking_point(self, d_s: float, d_y_loc: float) -> Tuple[float, float]:
         """

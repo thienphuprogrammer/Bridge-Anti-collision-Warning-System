@@ -4,8 +4,10 @@ from PIL import Image, ImageDraw
 from module import *
 
 inch_to_cm = 2.54
-ppi = 29812.0
-label = 67
+ppi = 19812
+label_cell_phone = 67
+label_mouse = 64
+label_cup = 41
 
 
 def flip_image(image):
@@ -14,18 +16,7 @@ def flip_image(image):
     return image
 
 
-def flip_point(point: np.ndarray, width: float, height: float):
-    # flip the point
-    point[0] = width - point[0]
-    point[1] = height - point[1]
-    return point
-
-
-def show_objects(image, points: np.ndarray = None,
-                 lines: np.ndarray = None,
-                 rectangles: np.ndarray = None):
-    # flip the image
-    image = flip_image(image)
+def show_objects(image, points: np.ndarray = None, lines: np.ndarray = None, rectangles: np.ndarray = None):
     draw = ImageDraw.Draw(image)
     if points is not None:
         for point in points:
@@ -42,29 +33,27 @@ def show_objects(image, points: np.ndarray = None,
 
 
 def get_objects_by_labels(results, label: int):
-    # get the objects with the given label
     objects = results[0].boxes
     labels = objects.cls
     objects = objects[labels == label]
+    if objects.cls is None:
+        return None
     return objects
 
 
 def middle_object(width, height, position) -> Tuple[np.ndarray, np.ndarray]:
     x_min, y_min, x_max, y_max = position
     point_1 = np.array([x_min + ((x_max - x_min) / 2), y_max, 0])
-    point_1 = flip_point(point_1, width, height)
     point_1 = np.array([point_1[0] + cx, point_1[1] + cy, 0])
 
     point_2 = np.array([x_min + ((x_max - x_min) / 2), y_min, 0])
-    point_2 = flip_point(point_2, width, height)
     point_2 = np.array([point_2[0] + cx, point_2[1] + cy, 0])
-
     return point_1, point_2
 
 
 class Model:
     def __init__(self, rand_points_: np.ndarray):
-        self.yolo = YOLO('yolov8m.pt')
+        self.yolo = YOLO('yolov8l.pt')
         self.camera = Camera(
             angles=angles,
             order=order,
@@ -93,12 +82,10 @@ class Model:
         w_1, h_1 = image_size
         w_1 = (w_1 / ppi) * inch_to_cm
         h_1 = (h_1 / ppi) * inch_to_cm
+
         w_2, h_2 = image_size
         w_2 = (w_2 / ppi) * inch_to_cm
         h_2 = (h_2 / ppi) * inch_to_cm
-
-        print(f"cx: {cx}\ncy: {cy}")
-        print(f"w_1: {w_1} \nh_1: {h_1} \nw_2: {w_2} \nh_2: {h_2}")
 
         # get the objects in the first image
         num_array_1 = (num_array_1 / ppi) * inch_to_cm
@@ -112,30 +99,23 @@ class Model:
         point_3, point_4 = middle_object(w_2, h_2, num_array_2)
 
         new_line_2 = ray_tracing(np.array([offset, point_2]))
-
         intersection_2 = intersection_between_line_and_plane(new_line_2, self.plane)
 
-        point_5 = np.array([x_1_min + cx, y_1_max + cy, 0])
-        point_5 = flip_point(point_5, w_1, h_1)
-        point_6 = np.array([x_1_max + cx, y_1_max + cy, 0])
-        point_6 = flip_point(point_6, w_1, h_1)
-        point_7 = np.array([x_2_min + cx, y_2_max + cy, 0])
-        point_7 = flip_point(point_7, w_2, h_2)
-        point_8 = np.array([x_2_max + cx, y_2_max + cy, 0])
-        point_8 = flip_point(point_8, w_2, h_2)
+        point_5 = np.array([x_1_min, y_1_max, 0])
+        point_5 = np.array([point_5[0] + cx, point_5[1] + cy, 0])
 
-        print(
-            f"num_array_1: {num_array_1} \nnum_array_2: {num_array_2}\n"
-            f"point_1: {point_1} \npoint_2: {point_2} \npoint_3: {point_3} \npoint_4: {point_4} \npoint_5: {point_5} "
-            f"\npoint_6: {point_6} \npoint_7: {point_7} \npoint_8: {point_8}"
-            f"\nintersection_2: {intersection_2}"
-            f"\nnew_line_2: {new_line_2}"
-            f"\nplane: {self.plane}"
-            f"\nlines: {self.lines}")
+        point_6 = np.array([x_1_max, y_1_max, 0])
+        point_6 = np.array([point_6[0] + cx, point_6[1] + cy, 0])
+
+        point_7 = np.array([x_2_min, y_2_max, 0])
+        point_7 = np.array([point_7[0] + cx, point_7[1] + cy, 0])
+
+        point_8 = np.array([x_2_max, y_2_max, 0])
+        point_8 = np.array([point_8[0] + cx, point_8[1] + cy, 0])
 
         r = f
         R = abs(offset[2] - intersection_2[2])
-        H = offset[0]
+        H = offset[1]
         h_s_1 = (distance_between_points(point_1, point_2))
         h_s_2 = (distance_between_points(point_3, point_4))
         d_s_1 = (distance_between_points(point_5, point_6))
@@ -152,14 +132,13 @@ class Model:
         d_1 = (distance_between_points(point_new_1, point_new_2))
         W_c = abs(self.rand_points[1][1] - self.rand_points[0][1])
         self.pinhole = Pinhole(r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c)
-        print(
-            f"r: {r} \nR: {R} \nH: {H} \nh_s_1: {h_s_1} \nh_s_2: {h_s_2} \nd_s_1: {d_s_1} \nd_s_2: {d_s_2} \nd_1: {d_1} \nW_c: {W_c} \nW_s: {self.pinhole.W_s} \nR_Prime: {self.pinhole.R_prime}")
+        print(f"r: {r} \nR: {R} \nH: {H} \nh_s_1: {h_s_1} \nh_s_2: {h_s_2} \nd_s_1: {d_s_1} \nd_s_2: {d_s_2} \nd_1: {d_1} \nW_c: {W_c}")
         value = self.pinhole.calculate_height_and_length_of_target()
         L_s, H_s = value[0]
-        print(f"L_s: {L_s} \nH_s: {H_s}")
+        H_s = H_s
         return L_s, H_s
 
-    def handle_logic(self):
+    def handle_logic_with_camera(self):
         # handle the logic
         cap = cv2.VideoCapture('./image/15724706959')
         if not cap.isOpened():
@@ -169,53 +148,73 @@ class Model:
         frame_interval = int(fps * 0.5)
         list_points = []
         frame_count = 0
-
+        L_s, H_s = 0, 0
+        tep = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if ret:
                 if frame_count % frame_interval == 0:
                     results = self.yolo(frame)
-                    objects = get_objects_by_labels(results, label)
-
-                    if objects is None:
+                    objects = get_objects_by_labels(results, label_mouse)
+                    if objects.xyxy.numel() == 0:
                         continue
-
-                    if objects.xyxy.detach().cpu().numpy().size == 0:
-                        continue
-
                     num_array = objects.xyxy[0].detach().cpu().numpy()
+                    x_min, y_min, x_max, y_max = num_array
                     list_points.append(num_array)
 
-                    if len(list_points) > 0 and num_array[1] > list_points[0][1]:
-                        result_1 = self.detect_objects(frame)
-                        result_2 = self.detect_objects(frame)
-                        result_1[0].show()
-                        result_2[0].show()
-                        if result_1[0].boxes is None or result_2[0].boxes is None:
-                            return
-                        L_s, H_s = self.measure_object(frame.shape[:2], result_1[0].boxes, result_2[0].boxes)
+                    cv2.rectangle(frame,
+                                  (int(x_min), int(y_min)),
+                                  (int(x_max), int(y_max)),
+                                  (0, 255, 0), 2)
+
+                    if len(list_points) > 0 and y_min > list_points[0][3] + 15:
+                        result_1 = list_points[0]
+                        result_2 = num_array
+                        h, w, _ = frame.shape
+                        L_s, H_s = self.measure_object((w, h), result_1, result_2)
                         print(f"L_s: {L_s} \nH_s: {H_s}")
-                        break
+                        # remove the first element
+                        list_points.pop(0)
 
-        # file_image_1 = 'image/img_2.png'
-        # file_image_2 = 'image/img_3.png'
-        # results_1 = model.detect_objects(file_image_1)
-        # results_2 = model.detect_objects(file_image_2)
-        # # results_1[0].show()
-        # # results_2[0].show()
-        # if results_1[0].boxes is None or results_2[0].boxes is None:
-        #     return
-        #
-        # image_1 = Image.open(file_image_1)
-        # image_2 = Image.open(file_image_2)
-        # L_s, H_s = self.measure_object(image_1, image_2, results_1, results_2)
+                    # add the text to the image
+                cv2.putText(frame, f"L_s: {L_s:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(frame, f"H_s: {H_s:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
+                # Display image
+                cv2.imshow('frame', frame)
+                if cv2.waitKey(50) & 0xFF == ord('q'):
+                    break
+                frame_count += 1
+            else:
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def handle_logic_with_image(self):
+        file_image_1 = 'image/img_7.png'
+        file_image_2 = 'image/img_6.png'
+
+        results_1 = model.detect_objects(file_image_1)
+        results_2 = model.detect_objects(file_image_2)
+
+        results_1 = get_objects_by_labels(results_1, label_cup)
+        results_2 = get_objects_by_labels(results_2, label_cup)
+        if results_1.xyxy.detach().cpu().numpy().size == 0 or results_2.xyxy.detach().cpu().numpy().size == 0:
+            return
+
+        num_array_1 = results_1.xyxy[0].detach().cpu().numpy()
+        num_array_2 = results_2.xyxy[0].detach().cpu().numpy()
+
+        image_1 = Image.open(file_image_1)
+        size = (image_1.size[0], image_1.size[1])
+        L_s, H_s = self.measure_object(size, num_array_1, num_array_2)
+        print(f"L_s: {L_s} \nH_s: {H_s}")
 
 
 z = [70, 70, 1, 1]
 y = [10, 110, 110, 10]
 x = [0, 0, 0, 0]
-
 rand_points = np.vstack((x, y, z))
 model = Model(rand_points)
 # image_1 = 'image/img_5.png'
@@ -226,7 +225,8 @@ model = Model(rand_points)
 # results_1[0].show()
 # print(results_1[0].boxes)
 
-model.handle_logic()
+model.handle_logic_with_image()
+# model.handle_logic_with_camera()
 
 # file_image_1 = 'image/img_7.png'
 # label = 64  # 64 is the mouse label

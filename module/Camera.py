@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 from numpy import ndarray
 from module.utils import *
 from module.Pinhole import *
+from module.config import *
 
 
 def distance_between_points(point_1: np.ndarray, point_2: np.ndarray) -> float:
@@ -151,70 +152,71 @@ def new_point(order_, old_point, line):
         point_ = line[0] + t * line[1]
     return point_
 
-#
-# # create a camera object
-# camera = Camera()
-# n_points = 4
-# z = [14, 14, 2, 2]
-# y = [-4, 11, 11, -4]
-# x = [0, 0, 0, 0]
-# rand_points = np.vstack((x, y, z))
-#
-# project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
-# line_1, line_2 = range_image(project_points)
-# plane_h = plane_location(rand_points)
-# # intersection = intersection_between_line_and_plane(new_line, plane_h)
-#
-# # Test the function
-# point_1 = np.array([5.19149, 4, 0])
-# point_2 = np.array([5.40541, 4, 0])
-# point_3 = np.array([5.55555, 4, 0])
-# point_4 = np.array([5.24324, 4, 0])
-#
-# point_5 = np.array([5.40, 4.16, 0])
-# point_6 = np.array([5.40, 3.83, 0])
-# point_7 = np.array([5.55, 4.22, 0])
-# point_8 = np.array([5.55, 3.77, 0])
-#
-# # points = np.vstack((point_1, point_2, point_3, point_4))
-# # new_line_1 = ray_tracing(np.array([offset, point_1]))
-# new_line_2 = ray_tracing(np.array([offset, point_2]))
-# # new_line_3 = ray_tracing(np.array([offset, point_3]))
-# # new_line_4 = ray_tracing(np.array([offset, point_4]))
-# # intersection_1 = intersection_between_line_and_plane(new_line_1, plane_h)
-# intersection_2 = intersection_between_line_and_plane(new_line_2, plane_h)
-# # intersection_3 = intersection_between_line_and_plane(new_line_3, plane_h)
-# # intersection_4 = intersection_between_line_and_plane(new_line_4, plane_h)
-#
-# r = f
-# R = abs(offset[2] - intersection_2[2])
-# H = offset[0]
-# h_s_1 = abs(point_1[0] - point_2[0])
-# h_s_2 = abs(point_3[0] - point_4[0])
-# d_s_1 = distance_between_points(point_5, point_6)
-# d_s_2 = distance_between_points(point_7, point_8)
-#
-# # calculate the width of the target
-# point_old_1, vec_u = line_1
-# t_1 = (-point_old_1[0] + point_5[0]) / vec_u[0]
-# point_new_1 = point_old_1 + t_1 * vec_u
-#
-# point_old_2, vec_u = line_2
-# t_2 = (-point_old_2[0] + point_5[0]) / vec_u[0]
-# point_new_2 = point_old_2 + t_2 * vec_u
-#
-# d_1 = distance_between_points(point_new_1, point_new_2)
-# W_c = abs(y[1] - y[0])
-#
-# print(f"r: {r}")
-# print(f"R: {R}")
-# print(f"H: {H}")
-# print(f"h_s_1: {h_s_1}")
-# print(f"h_s_2: {h_s_2}")
-# print(f"d_s_1: {d_s_1}")
-# print(f"d_s_2: {d_s_2}")
-# print(f"d_1: {d_1}")
-# print(f"W_c: {W_c}")
-#
-# pinhole = Pinhole(r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c)
-# print(pinhole.calculate_height_and_length_of_target())
+
+# create a camera object
+camera = Camera(angles, order, offset, f, s, a, cx, cy, img_size)
+n_points = 4
+z = [14, 14, 2, 2]
+y = [-4, 11, 11, -4]
+x = [0, 0, 0, 0]
+rand_points = np.vstack((x, y, z))
+
+project_points = camera.project_3d_point_to_2d(rand_points, is_homogeneous=False)
+line_1, line_2 = range_image(project_points)
+plane_h = plane_location(rand_points)
+# intersection = intersection_between_line_and_plane(new_line, plane_h)
+
+# Test the function
+point_1 = np.array([5.19149, 4, 0])
+point_2 = np.array([5.40541, 4, 0])
+point_3 = np.array([5.55555, 4, 0])
+point_4 = np.array([5.24324, 4, 0])
+
+point_5 = np.array([5.40, 4.16, 0])
+point_6 = np.array([5.40, 3.83, 0])
+point_7 = np.array([5.55, 4.22, 0])
+point_8 = np.array([5.55, 3.77, 0])
+
+# points = np.vstack((point_1, point_2, point_3, point_4))
+# new_line_1 = ray_tracing(np.array([offset, point_1]))
+new_line_2 = ray_tracing(np.array([offset, point_2]))
+# new_line_3 = ray_tracing(np.array([offset, point_3]))
+# new_line_4 = ray_tracing(np.array([offset, point_4]))
+# intersection_1 = intersection_between_line_and_plane(new_line_1, plane_h)
+intersection_2 = intersection_between_line_and_plane(new_line_2, plane_h)
+# intersection_3 = intersection_between_line_and_plane(new_line_3, plane_h)
+# intersection_4 = intersection_between_line_and_plane(new_line_4, plane_h)
+
+r = f
+R = abs(offset[2] - intersection_2[2])
+H = offset[1]
+h_s_1 = abs(point_1[0] - point_2[0])
+h_s_2 = abs(point_3[0] - point_4[0])
+d_s_1 = distance_between_points(point_5, point_6)
+d_s_2 = distance_between_points(point_7, point_8)
+
+# calculate the width of the target
+point_old_1, vec_u = line_1
+t_1 = (-point_old_1[0] + point_5[0]) / vec_u[0]
+point_new_1 = point_old_1 + t_1 * vec_u
+
+point_old_2, vec_u = line_2
+t_2 = (-point_old_2[0] + point_5[0]) / vec_u[0]
+point_new_2 = point_old_2 + t_2 * vec_u
+
+d_1 = distance_between_points(point_new_1, point_new_2)
+W_c = abs(y[1] - y[0])
+
+print(f"r: {r}")
+print(f"R: {R}")
+print(f"H: {H}")
+print(f"h_s_1: {h_s_1}")
+print(f"h_s_2: {h_s_2}")
+print(f"d_s_1: {d_s_1}")
+print(f"d_s_2: {d_s_2}")
+print(f"d_1: {d_1}")
+print(f"W_c: {W_c}")
+
+pinhole = Pinhole(r, R, H, h_s_1, h_s_2, d_s_1, d_s_2, d_1, W_c)
+print(f'R_prime: {pinhole.R_prime}')
+print(pinhole.calculate_height_and_length_of_target())
