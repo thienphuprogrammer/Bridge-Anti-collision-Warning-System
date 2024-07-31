@@ -167,15 +167,25 @@ plane_h = plane_location(rand_points)
 # intersection = intersection_between_line_and_plane(new_line, plane_h)
 
 # Test the function
-point_1 = np.array([5.19149, 4, 0])
-point_2 = np.array([5.40541, 4, 0])
-point_3 = np.array([5.55555, 4, 0])
-point_4 = np.array([5.24324, 4, 0])
+point_1 = np.array([5.191489361702128, 4, 0])
+point_2 = np.array([5.405405405405405, 4, 0])
+point_3 = np.array([5.555555555555555, 4, 0])
+point_4 = np.array([5.243243243243243, 4, 0])
 
-point_5 = np.array([5.40, 4.16, 0])
-point_6 = np.array([5.40, 3.83, 0])
-point_7 = np.array([5.55, 4.22, 0])
-point_8 = np.array([5.55, 3.77, 0])
+point_5 = np.array([5.4054054054050405, 4.16216216212162, 0])
+point_6 = np.array([5.4054054054050405, 3.83783783783784, 0])
+point_7 = np.array([5.5555555555555556, 4.22222222222222, 0])
+point_8 = np.array([5.5555555555555556, 3.77777777777777, 0])
+
+# point_1 = np.array([5.19, 4, 0])
+# point_2 = np.array([5.40, 4, 0])
+# point_3 = np.array([5.56, 4, 0])
+# point_4 = np.array([5.24, 4, 0])
+#
+# point_5 = np.array([5.41, 4.16, 0])
+# point_6 = np.array([5.41, 3.83, 0])
+# point_7 = np.array([5.56, 4.22, 0])
+# point_8 = np.array([5.56, 3.78, 0])
 
 # points = np.vstack((point_1, point_2, point_3, point_4))
 # new_line_1 = ray_tracing(np.array([offset, point_1]))

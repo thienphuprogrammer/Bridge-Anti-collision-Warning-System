@@ -7,7 +7,7 @@ angles = [np.pi]
 order = 'z'
 
 # translate by the given offset
-offset = np.array([5, 4, 0.6])
+offset = np.array([5, 4, -0.6])
 
 # define intrinsic parameters
 # -------------------------------
