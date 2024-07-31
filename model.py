@@ -161,7 +161,7 @@ class Model:
 
     def handle_logic(self):
         # handle the logic
-        cap = cv2.VideoCapture('./image/5651690126911.mp4')
+        cap = cv2.VideoCapture('./image/15724706959')
         if not cap.isOpened():
             print("Error: Could not open video.")
             return
@@ -176,6 +176,13 @@ class Model:
                 if frame_count % frame_interval == 0:
                     results = self.yolo(frame)
                     objects = get_objects_by_labels(results, label)
+
+                    if objects is None:
+                        continue
+
+                    if objects.xyxy.detach().cpu().numpy().size == 0:
+                        continue
+
                     num_array = objects.xyxy[0].detach().cpu().numpy()
                     list_points.append(num_array)
 
@@ -208,6 +215,7 @@ class Model:
 z = [70, 70, 1, 1]
 y = [10, 110, 110, 10]
 x = [0, 0, 0, 0]
+
 rand_points = np.vstack((x, y, z))
 model = Model(rand_points)
 # image_1 = 'image/img_5.png'
